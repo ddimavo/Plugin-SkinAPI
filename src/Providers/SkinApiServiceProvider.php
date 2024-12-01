@@ -104,11 +104,23 @@ class SkinApiServiceProvider extends BasePluginServiceProvider
      */
     protected function userNavigation()
     {
-        return [
+        if (!setting('skin.show_nav_icon', true)) {
+            return [];
+        }
+
+        $navigation = [
             'skin' => [
                 'route' => 'skin-api.home',
                 'name' => trans('skin-api::messages.title'),
+                'icon' => ' ',
             ],
         ];
+
+        $icon = setting('skin.navigation_icon');
+        if (!empty($icon)) {
+            $navigation['skin']['icon'] = $icon;
+        }
+
+        return $navigation;
     }
 }
