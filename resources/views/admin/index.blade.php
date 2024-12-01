@@ -80,6 +80,19 @@
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                         @enderror
                     </div>
+
+                    <div class="form-group col-md-12">
+                        <label for="notFoundBehavior">When User Not Found</label>
+                        <select class="form-control @error('not_found_behavior') is-invalid @enderror" id="notFoundBehavior" name="not_found_behavior">
+                            <option value="default_skin" {{ old('not_found_behavior', $not_found_behavior) === 'default_skin' ? 'selected' : '' }}>Return Default Steve Skin</option>
+                            <option value="error_message" {{ old('not_found_behavior', $not_found_behavior) === 'error_message' ? 'selected' : '' }}>Return User Not Found Error</option>
+                        </select>
+                        <small class="form-text text-muted">Choose what happens when a requested user doesn't exist</small>
+
+                        @error('not_found_behavior')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">

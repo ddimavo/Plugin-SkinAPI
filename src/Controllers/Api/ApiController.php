@@ -29,6 +29,17 @@ class ApiController extends Controller
             User::where('name', $user)->value('id');
 
         if ($userId === null) {
+            // Check the not found behavior setting
+            $behavior = setting('skin.not_found_behavior', 'default_skin');
+            
+            if ($behavior === 'error_message') {
+                return response()->json([
+                    'error' => 'User not found',
+                    'message' => "No user found with identifier: {$user}"
+                ], 404);
+            }
+            
+            // Default behavior: return steve skin
             return response()->file(base_path().'/plugins/skin-api/assets/img/steve.png', [
                 'Content-Type' => 'image/png',
             ]);

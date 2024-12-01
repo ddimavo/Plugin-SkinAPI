@@ -22,6 +22,7 @@ class AdminController extends Controller
             'show_nav_icon' => setting('skin.show_nav_icon', true),
             'show_in_profile' => setting('skin.show_in_profile', true),
             'navigation_icon' => setting('skin.navigation_icon', ''),
+            'not_found_behavior' => setting('skin.not_found_behavior', 'default_skin'),
         ]);
     }
 
@@ -33,6 +34,7 @@ class AdminController extends Controller
             'show_nav_icon' => 'sometimes|boolean',
             'show_in_profile' => 'sometimes|boolean',
             'navigation_icon' => 'nullable|string|max:50',
+            'not_found_behavior' => ['required', 'string', 'in:default_skin,error_message'],
         ]);
 
         // Handle checkbox values
