@@ -36,4 +36,24 @@ class AdminController extends Controller
         return redirect()->route('skin-api.admin.home')
             ->with('success', trans('admin.settings.status.updated'));
     }
+
+    /**
+     * Show the skins management page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function skins()
+    {
+        return redirect()->route('skin-api.admin.home');
+    }
+
+    /**
+     * Show the capes management page (currently inactive).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capes()
+    {
+        return abort(404);
+    }
 }

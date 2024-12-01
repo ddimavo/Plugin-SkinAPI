@@ -89,7 +89,8 @@ class SkinApiServiceProvider extends BasePluginServiceProvider
                 'icon' => 'bi bi-images',
                 'route' => 'skin-api.admin.*',
                 'items' => [
-                    'skin-api.admin.home' => trans('admin.nav.settings.settings'),
+                    'skin-api.admin.skins' => 'Skins',
+                    'skin-api.admin.capes' => 'Capes',
                 ],
                 'permission' => 'skin-api.manage',
             ],
