@@ -60,6 +60,17 @@
                         @enderror
                     </div>
 
+                    <div class="form-group col-md-4">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="showInProfile" name="show_in_profile" value="1" {{ old('show_in_profile', $show_in_profile) ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="showInProfile">Show Skin Management in Profile</label>
+                        </div>
+
+                        @error('show_in_profile')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+
                     <div class="form-group col-md-12">
                         <label for="navigationIcon">Navigation Icon</label>
                         <input type="text" class="form-control @error('navigation_icon') is-invalid @enderror" id="navigationIcon" name="navigation_icon" value="{{ old('navigation_icon', $navigation_icon) }}">

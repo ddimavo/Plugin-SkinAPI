@@ -7,6 +7,9 @@ use Azuriom\Models\Permission;
 use Azuriom\Models\User;
 use Azuriom\Plugin\SkinApi\SkinAPI;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Azuriom\Plugin\SkinApi\Cards\ChangeSkinViewCard;
+use Azuriom\Support\SettingsRepository;
 
 class SkinApiServiceProvider extends BasePluginServiceProvider
 {
@@ -50,17 +53,33 @@ class SkinApiServiceProvider extends BasePluginServiceProvider
 
         $this->loadTranslations();
 
-        // $this->loadMigrations();
-
-        Permission::registerPermissions([
-            'skin-api.manage' => 'skin-api::admin.permissions.manage',
-        ]);
+        $this->loadMigrations();
 
         $this->registerRouteDescriptions();
 
         $this->registerAdminNavigation();
 
         $this->registerUserNavigation();
+
+        // Initialize default settings if not set
+        $settings = app(SettingsRepository::class);
+        
+        if (!$settings->has('skin.width')) {
+            $settings->set('skin.width', 64);
+        }
+        if (!$settings->has('skin.height')) {
+            $settings->set('skin.height', 64);
+        }
+        if (!$settings->has('skin.scale')) {
+            $settings->set('skin.scale', 1);
+        }
+
+        Permission::registerPermissions([
+            'admin.skin-api' => 'skin-api::admin.permissions.admin',
+        ]);
+
+        // Register the skin change card in user profile
+        View::composer('profile.index', ChangeSkinViewCard::class);
     }
 
     /**

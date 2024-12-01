@@ -23,16 +23,36 @@ class ApiController extends Controller
             $user = Str::beforeLast($user, '.png');
         }
 
-        $userId = User::where('id', $user)->orWhere('name', $user)->value('id');
+        // Try to find user by ID first, then by name
+        $userId = is_numeric($user) ? 
+            User::where('id', $user)->value('id') : 
+            User::where('name', $user)->value('id');
 
-        if ($userId === null || ! Storage::disk('public')->exists("skins/{$userId}.png")) {
+        if ($userId === null) {
             return response()->file(base_path().'/plugins/skin-api/assets/img/steve.png', [
                 'Content-Type' => 'image/png',
             ]);
         }
 
-        return Storage::disk('public')->response("skins/{$userId}.png", 'skin.png', [
+        $skinPath = "skins/{$userId}.png";
+        
+        // Debug storage path
+        \Log::info('Looking for skin at: ' . storage_path("app/public/{$skinPath}"));
+        \Log::info('Storage exists: ' . (Storage::disk('public')->exists($skinPath) ? 'true' : 'false'));
+        
+        if (!Storage::disk('public')->exists($skinPath)) {
+            \Log::info('Skin file not found, returning default Steve skin');
+            return response()->file(base_path().'/plugins/skin-api/assets/img/steve.png', [
+                'Content-Type' => 'image/png',
+            ]);
+        }
+
+        \Log::info('Found skin file, returning it');
+        return Storage::disk('public')->response($skinPath, 'skin.png', [
             'Content-Type' => 'image/png',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0'
         ]);
     }
 

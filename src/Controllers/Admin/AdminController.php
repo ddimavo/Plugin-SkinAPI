@@ -20,6 +20,7 @@ class AdminController extends Controller
             'height' => setting('skin.height', 64),
             'scale' => setting('skin.scale', 1),
             'show_nav_icon' => setting('skin.show_nav_icon', true),
+            'show_in_profile' => setting('skin.show_in_profile', true),
             'navigation_icon' => setting('skin.navigation_icon', ''),
         ]);
     }
@@ -30,11 +31,13 @@ class AdminController extends Controller
             'width' => 'required|integer|min:0',
             'scale' => 'required|integer|min:0',
             'show_nav_icon' => 'sometimes|boolean',
+            'show_in_profile' => 'sometimes|boolean',
             'navigation_icon' => 'nullable|string|max:50',
         ]);
 
-        // Handle checkbox value
+        // Handle checkbox values
         $settings['show_nav_icon'] = $request->has('show_nav_icon');
+        $settings['show_in_profile'] = $request->has('show_in_profile');
 
         foreach ($settings as $name => $value) {
             Setting::updateSettings("skin.{$name}", $value);
