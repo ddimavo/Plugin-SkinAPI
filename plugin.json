@@ -2,10 +2,11 @@
     "id": "skin-api",
     "name": "SkinApi",
     "description": "Add a skin API for your Minecraft server.",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "url": "https://azuriom.com",
     "authors": [
-        "Javdu10"
+        "Javdu10",
+        "auuruum"
     ],
     "azuriom_api": "1.0.0",
     "providers": [
