@@ -24,6 +24,8 @@ return [
             'error' => 'An error occurred while uploading your cape.',
             'invalid' => 'The uploaded file is not a valid PNG image.',
             'dimensions' => 'The cape must be exactly :width x :height pixels.',
+            'choose_file' => 'Choose File',
+            'no_file' => 'No file chosen'
         ],
         'delete' => [
             'title' => 'Remove Cape',
@@ -32,5 +34,10 @@ return [
             'success' => 'Your cape has been removed successfully!',
             'error' => 'An error occurred while removing your cape.',
         ],
+    ],
+    'actions' => [
+        'choose-file' => 'Choose File',
+        'no-file' => 'No file chosen',
+        'browse' => 'Browse'
     ],
 ];

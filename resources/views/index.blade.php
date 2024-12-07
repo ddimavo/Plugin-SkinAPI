@@ -51,9 +51,9 @@
                 <div class="mb-3">
                     <label for="skin">{{ trans('skin-api::messages.skin') }}</label>
                     <div class="custom-file">
-                        <input type="file" class="form-control @error('skin') is-invalid @enderror" id="skin" name="skin" accept=".png" required>
-                        <label class="form-label" for="skin" data-browse="{{ trans('messages.actions.browse') }}" id="skinLabel">
-                            {{ trans('messages.actions.choose_file') }}
+                        <input type="file" class="custom-file-input @error('skin') is-invalid @enderror" id="skin" name="skin" accept=".png" required>
+                        <label class="custom-file-label" for="skin" data-browse="{{ trans('skin-api::messages.actions.browse') }}" id="skinLabel">
+                            {{ trans('skin-api::messages.actions.no-file') }}
                         </label>
 
                         @error('skin')
@@ -61,7 +61,7 @@
                         @enderror
                     </div>
 
-                     <img src="{{ $skinUrl }}" alt="{{ trans('skin-api::messages.skin') }}" id="skinPreview" class="mt-3 img-fluid">
+                    <img src="{{ $skinUrl }}" alt="{{ trans('skin-api::messages.skin') }}" id="skinPreview" class="mt-3 img-fluid">
                 </div>
 
                 <button type="submit" class="btn btn-primary">

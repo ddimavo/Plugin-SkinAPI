@@ -50,25 +50,31 @@
             const file = capeInput.files[0];
 
             if (file.name !== undefined && file.name !== '') {
-                document.getElementById('capeLabel').innerText = file.name;
+                const label = document.getElementById('capeLabel');
+                // Remove any existing content
+                label.innerHTML = '';
+                // Create a span for the filename
+                const filenameSpan = document.createElement('span');
+                filenameSpan.textContent = file.name;
+                filenameSpan.className = 'file-name';
+                label.appendChild(filenameSpan);
             }
 
             const reader = new FileReader();
 
             reader.onload = function (e) {
-                // Remove existing content (either message or image)
-                previewContainer.innerHTML = '';
-                
+                // Remove existing preview elements
+                while (previewContainer.firstChild) {
+                    previewContainer.removeChild(previewContainer.firstChild);
+                }
+
                 // Create and add new preview image
                 const preview = document.createElement('img');
-                preview.id = 'capePreview';
                 preview.src = e.target.result;
                 preview.alt = '{{ trans('skin-api::messages.cape.current') }}';
+                preview.id = 'capePreview';
                 preview.className = 'img-fluid mx-auto d-block';
-                preview.setAttribute('data-cape-preview', '');
-                preview.style.width = '250px';
-                preview.style.imageRendering = 'pixelated';
-                
+                preview.dataset.capePreview = '';
                 previewContainer.appendChild(preview);
             };
 
@@ -77,26 +83,33 @@
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
 
             try {
-                const response = await fetch(this.action, {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    credentials: 'same-origin'
+                    }
                 });
 
-                const data = await response.json();
-                
-                if(response.ok) {
-                    window.location.reload();
-                } else {
-                    throw new Error(data.message || 'An error occurred while uploading the cape');
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'An error occurred');
                 }
+
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success';
+                alert.textContent = result.message;
+                form.insertBefore(alert, form.firstChild);
+                
+                setTimeout(() => alert.remove(), 3000);
+
+                // Reload the page after successful upload
+                setTimeout(() => window.location.reload(), 1000);
             } catch (error) {
                 // Show error message
                 const alert = document.createElement('div');
@@ -126,9 +139,9 @@
 
     <div class="mb-3">
         <div class="custom-file">
-            <input type="file" class="form-control @error('cape') is-invalid @enderror" id="cape" name="cape" accept=".png" required>
-            <label class="custom-file-label" for="cape" id="capeLabel" data-browse="{{ trans('messages.actions.browse') }}">
-                {{ trans('messages.actions.choose-file') }}
+            <input type="file" class="custom-file-input @error('cape') is-invalid @enderror" id="cape" name="cape" accept=".png" required>
+            <label class="custom-file-label text-truncate" for="cape" id="capeLabel">
+                {{ trans('skin-api::messages.actions.no-file') }}
             </label>
 
             @error('cape')
@@ -149,26 +162,3 @@
         @endif
     </div>
 </form>
-
-<!-- Remove Cape Modal -->
-<div class="modal fade" id="removeCapeModal" tabindex="-1" role="dialog" aria-labelledby="removeCapeModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="removeCapeModalLabel">{{ trans('skin-api::messages.cape.delete.title') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{ trans('messages.confirm-action') }}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('messages.actions.cancel') }}</button>
-                <form action="{{ route('skin-api.capes.delete') }}" method="POST" class="d-inline-block">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">{{ trans('skin-api::messages.cape.delete.submit') }}</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
