@@ -86,10 +86,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="notFoundBehavior">When User Not Found</label>
+                    <label for="notFoundBehavior">When cape Not Found</label>
                     <select class="custom-select @error('not_found_behavior') is-invalid @enderror" id="notFoundBehavior" name="not_found_behavior">
-                        <option value="default_skin" {{ old('not_found_behavior', $not_found_behavior ?? 'default_skin') === 'default_skin' ? 'selected' : '' }}>Use Default Cape</option>
-                        <option value="error_message" {{ old('not_found_behavior', $not_found_behavior ?? 'default_skin') === 'error_message' ? 'selected' : '' }}>Show Error Message</option>
+                        <option value="skin_api_default" {{ old('not_found_behavior', $not_found_behavior ?? 'skin_api_default') === 'skin_api_default' ? 'selected' : '' }}>Use Default Cape</option>
+                        <option value="error_message" {{ old('not_found_behavior', $not_found_behavior ?? 'skin_api_default') === 'error_message' ? 'selected' : '' }}>Show Error Message</option>
                     </select>
 
                     @error('not_found_behavior')

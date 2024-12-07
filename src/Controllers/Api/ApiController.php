@@ -31,7 +31,7 @@ class ApiController extends Controller
 
         if ($userId === null) {
             // Check the not found behavior setting
-            $behavior = setting('skin.not_found_behavior', 'default_skin');
+            $behavior = setting('skin.not_found_behavior', 'skin_api_default');
             
             if ($behavior === 'error_message') {
                 return response()->json([
@@ -145,11 +145,33 @@ class ApiController extends Controller
         $capePath = "capes/{$userId}.png";
         
         if (!Storage::disk('public')->exists($capePath)) {
-            return response()->json([
-                'message' => 'User does not have a cape'
-            ], 404);
+            // User exists but has no cape
+            $notFoundBehavior = setting('skin.cape_not_found_behavior', 'default_skin');
+
+            if ($notFoundBehavior === 'error_message') {
+                return response()->json([
+                    'message' => 'User does not have a cape'
+                ], 404);
+            } else {
+                // Try to use default cape
+                $defaultCapePath = base_path('plugins/skin-api/assets/img/cape.png');
+                
+                if (!file_exists($defaultCapePath)) {
+                    return response()->json([
+                        'error' => 'Default cape not configured'
+                    ], 500);
+                }
+
+                return response()->file($defaultCapePath, [
+                    'Content-Type' => 'image/png',
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0'
+                ]);
+            }
         }
 
+        // User has their own cape, return it
         return Storage::disk('public')->response($capePath, 'cape.png', [
             'Content-Type' => 'image/png',
             'Cache-Control' => 'no-cache, no-store, must-revalidate',

@@ -20,9 +20,9 @@ class AdminController extends Controller
             'height' => setting('skin.height', 64),
             'scale' => setting('skin.scale', 1),
             'show_nav_icon' => setting('skin.show_nav_icon', true),
-            'show_in_profile' => setting('skin.show_in_profile', true),
+            'show_skin_in_profile' => setting('skin.show_skin_in_profile', true),
             'navigation_icon' => setting('skin.navigation_icon', ''),
-            'not_found_behavior' => setting('skin.not_found_behavior', 'default_skin'),
+            'not_found_behavior' => setting('skin.not_found_behavior', 'skin_api_default'),
         ]);
     }
 
@@ -32,14 +32,14 @@ class AdminController extends Controller
             'width' => 'required|integer|min:0',
             'scale' => 'required|integer|min:0',
             'show_nav_icon' => 'sometimes|boolean',
-            'show_in_profile' => 'sometimes|boolean',
+            'show_skin_in_profile' => 'sometimes|boolean',
             'navigation_icon' => 'nullable|string|max:50',
-            'not_found_behavior' => ['required', 'string', 'in:default_skin,error_message'],
+            'not_found_behavior' => ['required', 'string', 'in:skin_api_default,error_message'],
         ]);
 
         // Handle checkbox values
         $settings['show_nav_icon'] = $request->has('show_nav_icon');
-        $settings['show_in_profile'] = $request->has('show_in_profile');
+        $settings['show_skin_in_profile'] = $request->has('show_skin_in_profile');
 
         foreach ($settings as $name => $value) {
             Setting::updateSettings("skin.{$name}", $value);
@@ -70,9 +70,9 @@ class AdminController extends Controller
             'width' => setting('skin.cape_width', 64),
             'height' => setting('skin.cape_height', 32),
             'show_nav_button' => setting('skin.cape_show_nav_button', true),
-            'show_in_profile' => setting('skin.cape_show_in_profile', true),
+            'show_in_profile' => setting('skin.capes.show_in_profile', true),
             'nav_icon' => setting('skin.cape_nav_icon', ''),
-            'not_found_behavior' => setting('skin.cape_not_found_behavior', 'default_skin'),
+            'not_found_behavior' => setting('skin.cape_not_found_behavior', 'skin_api_default'),
         ]);
     }
 
@@ -84,7 +84,7 @@ class AdminController extends Controller
             'show_nav_button' => 'sometimes|boolean',
             'show_in_profile' => 'sometimes|boolean',
             'nav_icon' => 'nullable|string|max:50',
-            'not_found_behavior' => ['required', 'string', 'in:default_skin,error_message'],
+            'not_found_behavior' => ['required', 'string', 'in:skin_api_default,error_message'],
         ]);
 
         // Handle checkbox values
@@ -92,7 +92,11 @@ class AdminController extends Controller
         $settings['show_in_profile'] = $request->has('show_in_profile');
 
         foreach ($settings as $name => $value) {
-            Setting::updateSettings("skin.cape_{$name}", $value);
+            if ($name === 'show_in_profile') {
+                Setting::updateSettings('skin.capes.show_in_profile', $value);
+            } else {
+                Setting::updateSettings("skin.cape_{$name}", $value);
+            }
         }
 
         return redirect()->route('skin-api.admin.capes')

@@ -9,7 +9,7 @@ class ChangeSkinViewCard extends UserProfileCardComposer
     public function getCards(): array
     {
         // Only show the card if enabled in settings
-        if (!setting('skin.show_in_profile', true)) {
+        if (!setting('skin.show_skin_in_profile', true)) {
             return [];
         }
 

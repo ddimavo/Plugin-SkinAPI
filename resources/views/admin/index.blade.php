@@ -62,11 +62,11 @@
 
                     <div class="form-group col-md-4">
                         <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="showInProfile" name="show_in_profile" value="1" {{ old('show_in_profile', $show_in_profile) ? 'checked' : '' }}>
-                            <label class="custom-control-label" for="showInProfile">Show Skin Management in Profile</label>
+                            <input type="checkbox" class="custom-control-input" id="showSkinInProfile" name="show_skin_in_profile" value="1" {{ old('show_skin_in_profile', $show_skin_in_profile) ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="showSkinInProfile">Show Skin Management in Profile</label>
                         </div>
 
-                        @error('show_in_profile')
+                        @error('show_skin_in_profile')
                         <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                         @enderror
                     </div>
@@ -84,7 +84,7 @@
                     <div class="form-group col-md-12">
                         <label for="notFoundBehavior">When User Not Found</label>
                         <select class="form-control @error('not_found_behavior') is-invalid @enderror" id="notFoundBehavior" name="not_found_behavior">
-                            <option value="default_skin" {{ old('not_found_behavior', $not_found_behavior) === 'default_skin' ? 'selected' : '' }}>Return Default Steve Skin</option>
+                            <option value="skin_api_default" {{ old('not_found_behavior', $not_found_behavior) === 'skin_api_default' ? 'selected' : '' }}>Return Default Skin</option>
                             <option value="error_message" {{ old('not_found_behavior', $not_found_behavior) === 'error_message' ? 'selected' : '' }}>Return User Not Found Error</option>
                         </select>
                         <small class="form-text text-muted">Choose what happens when a requested user doesn't exist</small>
