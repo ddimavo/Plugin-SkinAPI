@@ -85,10 +85,72 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="notFoundBehavior">When User Not Found</label>
+                    <select class="custom-select @error('not_found_behavior') is-invalid @enderror" id="notFoundBehavior" name="not_found_behavior">
+                        <option value="default_skin" {{ old('not_found_behavior', $not_found_behavior ?? 'default_skin') === 'default_skin' ? 'selected' : '' }}>Use Default Cape</option>
+                        <option value="error_message" {{ old('not_found_behavior', $not_found_behavior ?? 'default_skin') === 'error_message' ? 'selected' : '' }}>Show Error Message</option>
+                    </select>
+
+                    @error('not_found_behavior')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-save"></i> {{ trans('messages.actions.save') }}
                 </button>
             </form>
+
+            <hr>
+
+            <h5 class="mt-4">Default Cape</h5>
+            <form action="{{ route('skin-api.admin.capes.default') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <div class="form-group">
+                    <label for="defaultCapeInput">Upload Default Cape</label>
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input @error('default_cape') is-invalid @enderror" id="defaultCapeInput" name="default_cape" accept=".png">
+                        <label class="custom-file-label" for="defaultCapeInput" data-browse="Browse">Choose file...</label>
+
+                        @error('default_cape')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
+                    </div>
+                    <small class="form-text text-muted">Upload a PNG file with dimensions {{ $width }}x{{ $height }} pixels</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Upload Default Cape
+                </button>
+
+                @if(file_exists(plugin_path('skin-api').'/assets/img/cape.png'))
+                    <div class="mt-3">
+                        <p>Current default cape:</p>
+                        <img src="{{ plugin_asset('skin-api', 'img/cape.png') }}" alt="Default Cape" class="img-fluid" style="max-width: 200px;">
+                        
+                        <form action="{{ route('skin-api.admin.capes.default.remove') }}" method="POST" class="d-inline mt-2">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Remove Default Cape
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </form>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Update file input label when file is selected
+        document.getElementById('defaultCapeInput').addEventListener('change', function(e) {
+            var fileName = e.target.files[0]?.name || 'Choose file...';
+            var label = e.target.nextElementSibling;
+            label.textContent = fileName;
+        });
+    </script>
+@endpush

@@ -72,6 +72,7 @@ class AdminController extends Controller
             'show_nav_button' => setting('skin.cape_show_nav_button', true),
             'show_in_profile' => setting('skin.cape_show_in_profile', true),
             'nav_icon' => setting('skin.cape_nav_icon', ''),
+            'not_found_behavior' => setting('skin.cape_not_found_behavior', 'default_skin'),
         ]);
     }
 
@@ -83,6 +84,7 @@ class AdminController extends Controller
             'show_nav_button' => 'sometimes|boolean',
             'show_in_profile' => 'sometimes|boolean',
             'nav_icon' => 'nullable|string|max:50',
+            'not_found_behavior' => ['required', 'string', 'in:default_skin,error_message'],
         ]);
 
         // Handle checkbox values
@@ -95,5 +97,61 @@ class AdminController extends Controller
 
         return redirect()->route('skin-api.admin.capes')
             ->with('success', trans('admin.settings.status.updated'));
+    }
+
+    public function removeDefaultCape()
+    {
+        $path = plugin_path('skin-api').'/assets/img/cape.png';
+        
+        if (file_exists($path)) {
+            unlink($path);
+            return redirect()->route('skin-api.admin.capes')
+                ->with('success', 'Default cape removed successfully');
+        }
+
+        return redirect()->route('skin-api.admin.capes')
+            ->with('error', 'No default cape found');
+    }
+
+    public function updateDefaultCape(Request $request)
+    {
+        // First validate basic file requirements
+        $this->validate($request, [
+            'default_cape' => [
+                'required',
+                'file',
+                'image',
+                'mimes:png'
+            ],
+        ]);
+
+        // Then validate dimensions after we know it's a valid image
+        if ($request->hasFile('default_cape')) {
+            $file = $request->file('default_cape');
+            $width = setting('skin.cape_width', 64);
+            $height = setting('skin.cape_height', 32);
+            
+            $image = getimagesize($file->getPathname());
+            if ($image[0] != $width || $image[1] != $height) {
+                return redirect()->route('skin-api.admin.capes')
+                    ->withErrors(['default_cape' => "The cape must be exactly {$width}x{$height} pixels"]);
+            }
+
+            $path = plugin_path('skin-api').'/assets/img';
+            
+            // Create directory if it doesn't exist
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            // Move the uploaded file to the correct location
+            $file->move($path, 'cape.png');
+
+            return redirect()->route('skin-api.admin.capes')
+                ->with('success', 'Default cape updated successfully');
+        }
+
+        return redirect()->route('skin-api.admin.capes')
+            ->with('error', 'No file was uploaded');
     }
 }

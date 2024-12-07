@@ -146,6 +146,80 @@ class SkinApiController extends Controller
     }
 
     /**
+     * Upload a cape for the authenticated user.
+     */
+    public function uploadCape(Request $request)
+    {
+        // First validate basic file requirements
+        $this->validate($request, [
+            'cape' => [
+                'required',
+                'file',
+                'image',
+                'mimes:png',
+            ],
+        ]);
+
+        $file = $request->file('cape');
+        if (!$file) {
+            return redirect()->route('skin-api.capes')
+                ->withErrors(['cape' => 'No file was uploaded']);
+        }
+
+        // Manually check dimensions
+        $width = setting('skin.cape_width', 64);
+        $height = setting('skin.cape_height', 32);
+        
+        $image = @getimagesize($file->getPathname());
+        if (!$image || $image[0] != $width || $image[1] != $height) {
+            return redirect()->route('skin-api.capes')
+                ->withErrors(['cape' => "The cape must be exactly {$width}x{$height} pixels"]);
+        }
+
+        $user = auth()->user();
+        $path = 'public/capes/'.$user->id.'.png';
+
+        Storage::put($path, file_get_contents($file));
+
+        return redirect()->route('skin-api.capes')
+            ->with('success', trans('skin-api::messages.cape.upload.success'));
+    }
+
+    /**
+     * Delete the authenticated user's cape.
+     */
+    public function deleteCape()
+    {
+        $user = auth()->user();
+        $path = 'public/capes/'.$user->id.'.png';
+
+        if (Storage::exists($path)) {
+            Storage::delete($path);
+        }
+
+        return redirect()->route('skin-api.capes')
+            ->with('success', trans('skin-api::messages.cape.delete.success'));
+    }
+
+    /**
+     * Show the cape management page.
+     */
+    public function capes()
+    {
+        $user = auth()->user();
+        $hasCape = Storage::exists('public/capes/' . $user->id . '.png');
+        
+        // Add timestamp to cape URL to prevent caching
+        $timestamp = $hasCape ? '?t=' . Storage::lastModified('public/capes/' . $user->id . '.png') : '';
+        $capeUrl = $hasCape ? url('/api/skin-api/capes/' . $user->id) . $timestamp : asset('plugins/skin-api/assets/img/cape.png');
+
+        return view('skin-api::capes', [
+            'hasCape' => $hasCape,
+            'capeUrl' => $capeUrl,
+        ]);
+    }
+
+    /**
      * Show the cape management page.
      */
     public function showCape()
@@ -155,7 +229,7 @@ class SkinApiController extends Controller
         
         // Add timestamp to cape URL to prevent caching
         $timestamp = $hasCape ? '?t=' . Storage::lastModified('public/capes/' . $user->id . '.png') : '';
-        $capeUrl = $hasCape ? url('/api/skin-api/capes/' . $user->id) . $timestamp : asset('plugins/skin-api/assets/images/no-cape.png');
+        $capeUrl = $hasCape ? url('/api/skin-api/capes/' . $user->id) . $timestamp : asset('plugins/skin-api/assets/img/cape.png');
 
         return view('skin-api::capes', [
             'hasCape' => $hasCape,
@@ -168,7 +242,7 @@ class SkinApiController extends Controller
     /**
      * Upload a new cape for the user.
      */
-    public function uploadCape(Request $request)
+    public function uploadCapeOld(Request $request)
     {
         $request->validate([
             'cape' => ['required', 'file', 'image', 'mimes:png', 'max:2048'],
@@ -211,7 +285,7 @@ class SkinApiController extends Controller
     /**
      * Delete the user's cape.
      */
-    public function deleteCape()
+    public function deleteCapeOld()
     {
         $path = 'public/capes/' . auth()->id() . '.png';
         
