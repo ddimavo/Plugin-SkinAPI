@@ -15,6 +15,7 @@ return [
         'title' => 'Cape Management',
         'management' => 'Cape Management',
         'current' => 'Current Cape',
+        'no_cape' => 'You don\'t have a cape',
         'upload' => [
             'title' => 'Upload Cape',
             'submit' => 'Upload',
@@ -26,7 +27,8 @@ return [
         ],
         'delete' => [
             'title' => 'Remove Cape',
-            'submit' => 'Remove',
+            'submit' => 'Remove Cape',
+            'confirm' => 'Are you sure you want to remove your cape?',
             'success' => 'Your cape has been removed successfully!',
             'error' => 'An error occurred while removing your cape.',
         ],

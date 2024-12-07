@@ -9,6 +9,7 @@ use Azuriom\Plugin\SkinApi\SkinAPI;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 use Azuriom\Plugin\SkinApi\Cards\ChangeSkinViewCard;
+use Azuriom\Plugin\SkinApi\Cards\ChangeCapeViewCard;
 use Azuriom\Support\SettingsRepository;
 
 class SkinApiServiceProvider extends BasePluginServiceProvider
@@ -80,6 +81,7 @@ class SkinApiServiceProvider extends BasePluginServiceProvider
 
         // Register the skin change card in user profile
         View::composer('profile.index', ChangeSkinViewCard::class);
+        View::composer('profile.index', ChangeCapeViewCard::class);
     }
 
     /**

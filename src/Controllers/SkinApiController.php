@@ -150,55 +150,57 @@ class SkinApiController extends Controller
      */
     public function uploadCape(Request $request)
     {
-        // First validate basic file requirements
-        $this->validate($request, [
-            'cape' => [
-                'required',
-                'file',
-                'image',
-                'mimes:png',
-            ],
+        $request->validate([
+            'cape' => ['required', 'file', 'image', 'mimes:png', 'max:2048'],
         ]);
 
-        $file = $request->file('cape');
-        if (!$file) {
-            return redirect()->route('skin-api.capes')
-                ->withErrors(['cape' => 'No file was uploaded']);
+        try {
+            if (!$request->hasFile('cape') || !$request->file('cape')->isValid()) {
+                return redirect()->back()->with('error', trans('skin-api::messages.cape.upload.error'));
+            }
+
+            $file = $request->file('cape');
+            
+            // Check dimensions using getimagesize
+            $imageInfo = getimagesize($file->getPathname());
+            if (!$imageInfo || $imageInfo[0] !== self::DEFAULT_CAPE_WIDTH || $imageInfo[1] !== self::DEFAULT_CAPE_HEIGHT) {
+                return redirect()->back()->with('error', trans('skin-api::messages.cape.upload.dimensions', [
+                    'width' => self::DEFAULT_CAPE_WIDTH,
+                    'height' => self::DEFAULT_CAPE_HEIGHT
+                ]));
+            }
+
+            // Create storage directory if it doesn't exist
+            $storagePath = storage_path('app/public/capes');
+            if (!File::exists($storagePath)) {
+                File::makeDirectory($storagePath, 0755, true);
+            }
+
+            // Save the cape
+            $fileName = $request->user()->id . '.png';
+            $file->move($storagePath, $fileName);
+
+            return redirect()->back()->with('success', trans('skin-api::messages.cape.upload.success'));
+        } catch (\Exception $e) {
+            Log::error('Cape upload error: ' . $e->getMessage());
+            return redirect()->back()->with('error', trans('skin-api::messages.cape.upload.error'));
         }
-
-        // Manually check dimensions
-        $width = setting('skin.cape_width', 64);
-        $height = setting('skin.cape_height', 32);
-        
-        $image = @getimagesize($file->getPathname());
-        if (!$image || $image[0] != $width || $image[1] != $height) {
-            return redirect()->route('skin-api.capes')
-                ->withErrors(['cape' => "The cape must be exactly {$width}x{$height} pixels"]);
-        }
-
-        $user = auth()->user();
-        $path = 'public/capes/'.$user->id.'.png';
-
-        Storage::put($path, file_get_contents($file));
-
-        return redirect()->route('skin-api.capes')
-            ->with('success', trans('skin-api::messages.cape.upload.success'));
     }
 
-    /**
-     * Delete the authenticated user's cape.
-     */
-    public function deleteCape()
+    public function deleteCape(Request $request)
     {
-        $user = auth()->user();
-        $path = 'public/capes/'.$user->id.'.png';
+        try {
+            $capePath = storage_path('app/public/capes/' . $request->user()->id . '.png');
+            
+            if (File::exists($capePath)) {
+                File::delete($capePath);
+            }
 
-        if (Storage::exists($path)) {
-            Storage::delete($path);
+            return redirect()->back()->with('success', trans('skin-api::messages.cape.delete.success'));
+        } catch (\Exception $e) {
+            Log::error('Cape deletion error: ' . $e->getMessage());
+            return redirect()->back()->with('error', trans('skin-api::messages.cape.delete.error'));
         }
-
-        return redirect()->route('skin-api.capes')
-            ->with('success', trans('skin-api::messages.cape.delete.success'));
     }
 
     /**
