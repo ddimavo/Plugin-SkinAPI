@@ -8,6 +8,7 @@ use Azuriom\Plugin\SkinApi\SkinAPI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class ApiController extends Controller
 {
@@ -116,5 +117,123 @@ class ApiController extends Controller
         }
 
         return $request->file('skin')->storeAs('skins', "{$user->id}.png", 'public');
+    }
+
+    /**
+     * Show the user's cape.
+     *
+     * @param  string $user
+     * @return \Illuminate\Http\Response
+     */
+    public function showCape(string $user)
+    {
+        if (Str::endsWith($user, '.png')) {
+            $user = Str::beforeLast($user, '.png');
+        }
+
+        // Try to find user by ID first, then by name
+        $userId = is_numeric($user) ? 
+            User::where('id', $user)->value('id') : 
+            User::where('name', $user)->value('id');
+
+        if ($userId === null) {
+            return response()->file(
+                base_path().'/plugins/skin-api/assets/images/no-cape.png',
+                [
+                    'Content-Type' => 'image/png',
+                    'Cache-Control' => 'no-cache, must-revalidate'
+                ]
+            );
+        }
+
+        $capePath = "public/capes/{$userId}.png";
+        
+        if (!Storage::exists($capePath)) {
+            return response()->file(
+                base_path().'/plugins/skin-api/assets/images/no-cape.png',
+                [
+                    'Content-Type' => 'image/png',
+                    'Cache-Control' => 'no-cache, must-revalidate'
+                ]
+            );
+        }
+
+        return response()->file(
+            Storage::path($capePath),
+            [
+                'Content-Type' => 'image/png',
+                'Cache-Control' => 'no-cache, must-revalidate',
+                'Last-Modified' => gmdate('D, d M Y H:i:s', Storage::lastModified($capePath)).' GMT'
+            ]
+        );
+    }
+
+    /**
+     * Show the user's cape.
+     *
+     * @param  string $identifier
+     * @return \Illuminate\Http\Response
+     */
+    public function getCape($identifier)
+    {
+        $user = User::findOrFail($identifier);
+        $capePath = 'public/capes/' . $user->id . '.png';
+
+        if (!Storage::exists($capePath)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::path($capePath), [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'public, max-age=600'
+        ]);
+    }
+
+    /**
+     * Update the user's cape.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function updateCape(Request $request)
+    {
+        $request->validate([
+            'cape' => ['required', 'image', 'mimes:png', 'dimensions:width=' . setting('skin.cape_width', 64) . ',height=' . setting('skin.cape_height', 32)],
+        ]);
+
+        $user = $request->user();
+        $capePath = "skins/capes/{$user->id}.png";
+
+        // Delete old cape if exists
+        if (Storage::exists($capePath)) {
+            Storage::delete($capePath);
+        }
+
+        // Store new cape
+        $request->file('cape')->storeAs(dirname($capePath), basename($capePath));
+
+        return response()->json([
+            'message' => trans('skin-api::messages.cape.upload.success'),
+        ]);
+    }
+
+    /**
+     * Remove the user's cape.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function removeCape(Request $request)
+    {
+        $user = $request->user();
+        $capePath = "skins/capes/{$user->id}.png";
+
+        if (Storage::exists($capePath)) {
+            Storage::delete($capePath);
+        }
+
+        return response()->json([
+            'message' => trans('skin-api::messages.cape.delete.success'),
+        ]);
     }
 }

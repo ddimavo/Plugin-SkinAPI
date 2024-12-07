@@ -45,7 +45,7 @@ class AdminController extends Controller
             Setting::updateSettings("skin.{$name}", $value);
         }
 
-        return redirect()->route('skin-api.admin.home')
+        return redirect()->route('skin-api.admin.index')
             ->with('success', trans('admin.settings.status.updated'));
     }
 
@@ -56,16 +56,44 @@ class AdminController extends Controller
      */
     public function skins()
     {
-        return redirect()->route('skin-api.admin.home');
+        return redirect()->route('skin-api.admin.index');
     }
 
     /**
-     * Show the capes management page (currently inactive).
+     * Show the capes management page.
      *
      * @return \Illuminate\Http\Response
      */
     public function capes()
     {
-        return abort(404);
+        return view('skin-api::admin.capes', [
+            'width' => setting('skin.cape_width', 64),
+            'height' => setting('skin.cape_height', 32),
+            'show_nav_button' => setting('skin.cape_show_nav_button', true),
+            'show_in_profile' => setting('skin.cape_show_in_profile', true),
+            'nav_icon' => setting('skin.cape_nav_icon', ''),
+        ]);
+    }
+
+    public function updateCapes(Request $request)
+    {
+        $settings = $this->validate($request, [
+            'height' => 'required|integer|min:1',
+            'width' => 'required|integer|min:1',
+            'show_nav_button' => 'sometimes|boolean',
+            'show_in_profile' => 'sometimes|boolean',
+            'nav_icon' => 'nullable|string|max:50',
+        ]);
+
+        // Handle checkbox values
+        $settings['show_nav_button'] = $request->has('show_nav_button');
+        $settings['show_in_profile'] = $request->has('show_in_profile');
+
+        foreach ($settings as $name => $value) {
+            Setting::updateSettings("skin.cape_{$name}", $value);
+        }
+
+        return redirect()->route('skin-api.admin.capes')
+            ->with('success', trans('admin.settings.status.updated'));
     }
 }
