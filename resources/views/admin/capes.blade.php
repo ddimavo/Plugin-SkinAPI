@@ -16,7 +16,7 @@
 
                         <div class="mb-2">
                             <div>{{ trans('skin-api::admin.api.using_username') }}:</div>
-                            <code>GET {{ url('/api/skin-api/capes/name/{username}') }}</code>
+                            <code>GET {{ url('/api/skin-api/capes/{username}') }}</code>
                         </div>
 
                         <div class="mt-3">
